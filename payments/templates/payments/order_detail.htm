@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order #{{ order.id }} - Checkout</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+        
+        .items-list {
+            margin-bottom: 30px;
+        }
+        
+        .item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .item:last-child {
+            border-bottom: none;
+        }
+        
+        .item-info h3 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .item-info p {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .item-price {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        
+        .pricing-summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .pricing-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            color: #666;
+        }
+        
+        .pricing-row.total {
+            border-top: 2px solid #ddd;
+            margin-top: 10px;
+            padding-top: 15px;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .discount {
+            color: #28a745;
+        }
+        
+        .tax {
+            color: #dc3545;
+        }
+        
+        #buy-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        #buy-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        #buy-button:active {
+            transform: translateY(0);
+        }
+        
+        #buy-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+        
+        .error {
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c33;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .badge.discount {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge.tax {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: #667eea;
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to all items</a>
+        <h1>Order #{{ order.id }}</h1>
+        
+        <div class="items-list">
+            {% for item in items %}
+            <div class="item">
+                <div class="item-info">
+                    <h3>{{ item.name }}</h3>
+                    <p>{{ item.description }}</p>
+                </div>
+                <div class="item-price">{{ item.get_display_price }}</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="pricing-summary">
+            <div class="pricing-row">
+                <span>Subtotal:</span>
+                <span>${{ subtotal }}</span>
+            </div>
+            
+            {% if order.discount %}
+            <div class="pricing-row discount">
+                <span>Discount ({{ order.discount.code }}):</span>
+                <span>-${{ discount_amount }}</span>
+            </div>
+            {% endif %}
+            
+            {% if order.tax %}
+            <div class="pricing-row tax">
+                <span>Tax ({{ order.tax.name }}):</span>
+                <span>+${{ tax_amount }}</span>
+            </div>
+            {% endif %}
+            
+            <div class="pricing-row total">
+                <span>Total:</span>
+                <span>${{ total }}</span>
+            </div>
+        </div>
+
+        <button id="buy-button">Complete Purchase</button>
+        <div class="loading" id="loading">Processing your payment...</div>
+        <div class="error" id="error"></div>
+    </div>
+
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        var stripe = Stripe('{{ stripe_public_key }}');
+        var buyButton = document.getElementById('buy-button');
+        var loading = document.getElementById('loading');
+        var errorDiv = document.getElementById('error');
+
+        buyButton.addEventListener('click', function() {
+            // Disable button and show loading
+            buyButton.disabled = true;
+            loading.style.display = 'block';
+            errorDiv.style.display = 'none';
+
+            // Create checkout session
+            fetch('/buy/order/{{ order.id }}/', {
+                method: 'GET',
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                // Redirect to Stripe Checkout
+                return stripe.redirectToCheckout({ sessionId: data.id });
+            })
+            .then(function(result) {
+                if (result.error) {
+                    throw new Error(result.error.message);
+                }
+            })
+            .catch(function(error) {
+                // Show error
+                errorDiv.textContent = 'Error: ' + error.message;
+                errorDiv.style.display = 'block';
+                buyButton.disabled = false;
+                loading.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>
