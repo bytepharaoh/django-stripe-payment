@@ -63,12 +63,22 @@ ALLOWED_HOSTS=localhost,127.0.0.1
 docker-compose up --build
 ```
 
-5. **Create superuser (in another terminal)**
+5. **Run migrations**
+```bash
+docker-compose exec web python manage.py migrate
+```
+
+6. **Collect static files**
+```bash
+docker-compose exec web python manage.py collectstatic --noinput
+```
+
+7. **Create superuser**
 ```bash
 docker-compose exec web python manage.py createsuperuser
 ```
 
-6. **Access the application**
+8. **Access the application**
 - Main site: http://localhost:8000
 - Admin panel: http://localhost:8000/admin
 
@@ -99,17 +109,18 @@ cp .env.example .env
 
 5. **Run migrations**
 ```bash
+python manage.py makemigrations payments
 python manage.py migrate
 ```
 
-6. **Create superuser**
+6. **Collect static files**
 ```bash
-python manage.py createsuperuser
+python manage.py collectstatic --noinput
 ```
 
-7. **Collect static files**
+7. **Create superuser**
 ```bash
-python manage.py collectstatic
+python manage.py createsuperuser
 ```
 
 8. **Run development server**
@@ -303,7 +314,7 @@ django-stripe-payment/
 ├── Dockerfile             # Docker image definition
 ├── requirements.txt       # Python dependencies
 ├── .env.example           # Example environment variables
-└── README.md             # This file
+└── README.md              # This file
 ```
 
 ## 🔒 Security Notes
@@ -358,10 +369,11 @@ This project is for educational purposes as part of a technical assessment.
 
 ## 👤 Author
 
-Your Name - Technical Assessment Submission
+bytepharaoh - Technical Assessment Submission
 
 ## 🙏 Acknowledgments
 
 - Django Documentation
 - Stripe API Documentation
 - Anthropic Claude for assistance
+
