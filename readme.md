@@ -128,22 +128,22 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 ### Option 3: Automated Setup (Fastest):
-# 1. Create project directory and navigate to it
+1. **Create project directory and navigate to it**
 ```bash
 mkdir django-stripe-payment && cd django-stripe-payment
 ```
-# 2. Copy all the files I created into this directory
-#   (Use the artifacts I provided above)
+2. **Copy all the files I created into this directory**
+    (Use the artifacts I provided above)
 
-# 3. Make setup script executable (Mac/Linux)
+3. **Make setup script executable (Mac/Linux)**
 ```bash
 chmod +x setup.sh
 ```
-# 4. Run setup script
+4. **Run setup script**
 ```bash
 ./setup.sh
 ```
-# 5. Start server
+5. **Start server**
 ```bash
 python manage.py runserver
 ```
