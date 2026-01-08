@@ -388,7 +388,7 @@ This project is for educational purposes as part of a technical assessment.
 
 ## 👤 Author
 
-bytepharaoh - Technical Assessment Submission
+Ziad (bytepharaoh) - Technical Assessment Submission
 
 ## 🙏 Acknowledgments
 
